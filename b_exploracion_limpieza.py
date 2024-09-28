@@ -26,29 +26,14 @@ cur.fetchall()
 ratings=pd.read_sql("select * from ratings", conn)
 movies=pd.read_sql("select * from movies", conn)
 
-### tratamiento para separar generos en columnas
-genres=movies['genres'].str.split('|')
-te = TransactionEncoder()
-genres = te.fit_transform(genres)
-genres = pd.DataFrame(genres, columns = te.columns_)
-
-### unir tablas
-movies_tratada = pd.concat([movies, genres], axis=1)
-movies_tratada = movies_tratada.drop('genres', axis=1)
-
-
 ##### EXPLORACIÓN INICIAL
-movies_tratada.info()
-movies_tratada.head()
-movies_tratada.duplicated().sum()
+movies.info()
+movies.head()
+movies.duplicated().sum()
 
 # ver duplicados por titulo 
-duplicados = movies_tratada[movies_tratada.duplicated(subset=['title'], keep=False)]
+duplicados = movies[movies.duplicated(subset=['title'], keep=False)]
 duplicados.sort_values(by='title')
-
-### para llevar un data frame de pandas a SQL
-completo = movies_tratada
-completo.to_sql('movies',conn,index=False, if_exists='replace')
 
 ##### CANTIDAD DE CALIFICACIONES POR PELICULA
 ratings.info()
@@ -140,6 +125,8 @@ fn.ejecutar_sql('preprocesamientos.sql', cur)
 cur.execute("select name from sqlite_master where type='table' ")
 cur.fetchall()
 
+usuarios_sel=pd.read_sql("select * from usuarios_sel", conn)
+movies_sel=pd.read_sql("select * from movies_sel", conn)
 ratings_final=pd.read_sql("select * from ratings", conn)
 movies_final=pd.read_sql("select * from movies", conn)
 full_ratings=pd.read_sql('select * from full_ratings',conn)
@@ -161,3 +148,23 @@ ratings=pd.read_sql('select * from full_ratings',conn)
 ratings.duplicated().sum() ## al cruzar tablas a veces se duplican registros
 ratings.info()
 ratings.head(10)
+
+
+### Este tratamiento se debe revisar para que tablas se hace el tratamiento
+### ______________________________________________________________________
+
+### tratamiento para separar generos en columnas
+genres=movies['genres'].str.split('|')
+te = TransactionEncoder()
+genres = te.fit_transform(genres)
+genres = pd.DataFrame(genres, columns = te.columns_)
+
+### unir tablas
+movies_tratada = pd.concat([movies, genres], axis=1)
+movies_tratada = movies_tratada.drop('genres', axis=1)
+
+
+
+### para llevar un data frame de pandas a SQL
+completo = movies_tratada
+completo.to_sql('movies',conn,index=False, if_exists='replace')
