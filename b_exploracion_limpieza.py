@@ -1,22 +1,24 @@
-import numpy as np
+
 import pandas as pd
 import sqlite3 as sql
 import plotly.graph_objs as go ### para gráficos
 import plotly.express as px
 import a_funciones as fn
-## pip install mlxtend
+##%pip install mlxtend
 from mlxtend.preprocessing import TransactionEncoder
 
 #pip install --upgrade nbformat
 ###pip install  pysqlite3
 
+import sqlite3
+import pandas as pd
 
 
 ###### para ejecutar sql y conectarse a bd ###
 conn=sql.connect('data\\db_movies2') ### crear cuando no existe el nombre de cd  y para conectarse cuando sí existe.
 cur=conn.cursor() ###para funciones que ejecutan sql en base de datos
 
-##conn.close() ### cerrar conexion base de datos
+#conn.close() ### cerrar conexion base de datos
 
 ##Verificar tablas que hay en la base de datos
 cur.execute("SELECT name FROM sqlite_master where type='table' ")
@@ -40,6 +42,7 @@ ratings.info()
 ratings.head()
 ratings.duplicated().sum()
 
+#%%
 
 ##### DESCRIPCIÓN DE BASE RATINGS
 
@@ -154,17 +157,17 @@ ratings.head(10)
 ### ______________________________________________________________________
 
 ### tratamiento para separar generos en columnas
-genres=movies['genres'].str.split('|')
-te = TransactionEncoder()
-genres = te.fit_transform(genres)
-genres = pd.DataFrame(genres, columns = te.columns_)
+#genres=movies['genres'].str.split('|')
+#te = TransactionEncoder()
+#genres = te.fit_transform(genres)
+#genres = pd.DataFrame(genres, columns = te.columns_)
 
 ### unir tablas
-movies_tratada = pd.concat([movies, genres], axis=1)
-movies_tratada = movies_tratada.drop('genres', axis=1)
+#movies_tratada = pd.concat([movies, genres], axis=1)
+#movies_tratada = movies_tratada.drop('genres', axis=1)
 
 
 
 ### para llevar un data frame de pandas a SQL
-completo = movies_tratada
-completo.to_sql('movies',conn,index=False, if_exists='replace')
+#completo = movies_tratada
+#completo.to_sql('movies',conn,index=False, if_exists='replace')
