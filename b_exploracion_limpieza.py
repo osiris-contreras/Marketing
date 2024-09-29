@@ -42,7 +42,6 @@ ratings.info()
 ratings.head()
 ratings.duplicated().sum()
 
-#%%
 
 ##### DESCRIPCIÓN DE BASE RATINGS
 
