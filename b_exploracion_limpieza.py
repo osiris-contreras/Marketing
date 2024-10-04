@@ -34,7 +34,7 @@ movies.duplicated().sum()
 # ver duplicados por titulo 
 duplicados = movies[movies.duplicated(subset=['title'], keep=False)]
 duplicados.sort_values(by='title')
-
+duplicados.info()
 ##### CANTIDAD DE CALIFICACIONES POR PELICULA
 ratings.info()
 ratings.head()
