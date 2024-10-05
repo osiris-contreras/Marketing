@@ -12,6 +12,7 @@ import sqlite3 as sql
 from sklearn.preprocessing import MinMaxScaler
 import plotly.express as px
 import plotly.graph_objs as go
+##%pip install mlxtend
 from mlxtend.preprocessing import TransactionEncoder
 import joblib
 from sklearn import neighbors ### basado en contenido un solo producto consumido
@@ -25,7 +26,10 @@ conn = sql.connect('data/db_movies2')
 full_ratings = pd.read_sql('SELECT * FROM full_ratings', conn)
 
 # Extraer el año de la columna 'title'
-full_ratings['year'] = full_ratings['title'].str.extract(r'\((\d{4})\)').astype(float)
+full_ratings['year'] = full_ratings['title'].str.extract('\(([^)]*)\)$', expand=False)
+nulos_year = full_ratings.loc[full_ratings['year'].isna()]
+full_ratings.loc[(full_ratings['title'] == "Ready Player One") & (full_ratings['year'].isna()), 'year'] = 2018
+full_ratings['year']=full_ratings.year.astype('int')
 
 # Normalizar la columna 'year'
 scaler = MinMaxScaler()
@@ -59,7 +63,7 @@ joblib.dump(final2,"data\\fianl2.joblib") ### para utilizar en segundos modelos
 # Opción 1.  10 películas más calificadas
 # Seleccionar las películas más calificadas
 top_rated_movies = pd.read_sql('''
-    SELECT title, COUNT(*) AS num_ratings, AVG(rating) AS avg_rating
+    SELECT movieId, title, COUNT(*) AS num_ratings, AVG(rating) AS avg_rating
     FROM full_ratings
     GROUP BY title
     HAVING num_ratings >= 10
@@ -68,8 +72,14 @@ top_rated_movies = pd.read_sql('''
 ''', conn)
 
 # Mostrar las 10 películas más calificadas
-fig_popularity = px.bar(top_rated_movies, x='title', y='avg_rating', title='Top 10 Películas por Calificación Promedio')
-fig_popularity.show()
+fig_most_rated = px.bar(top_rated_movies, 
+                        x='title', 
+                        y='avg_rating', 
+                        title='Top 10 Películas Más Calificadas', 
+                        labels={'avg_rating': 'Calificaciones', 'title': 'Película'}, 
+                        text='num_ratings')
+
+fig_most_rated.show()
 
 ###################################################
 # Opción 2. Película mejor calificada por año
