@@ -35,8 +35,29 @@ movies.duplicated().sum()
 
 # ver duplicados por titulo 
 duplicados = movies[movies.duplicated(subset=['title'], keep=False)]
-duplicados.sort_values(by='title')
-duplicados.info()
+duplicados = duplicados.sort_values(by='title')
+
+#------------ Eliminando duplicados ------------------------------------------
+
+### como hay muchos duplicados por titulo, se identifican los generos por separado
+### para eliminarlas las lineas de los duplicados con menos cantidad de generos
+
+movies['num_genres'] = movies['genres'].apply(lambda x: len(x.split('|')))
+movies = movies.sort_values(by=['title', 'num_genres'], ascending=[True, False])
+movies = movies.drop_duplicates(subset='title', keep='first')
+
+# Eliminar la columna auxiliar 'num_genres' por que no es necesaria
+movies = movies.drop(columns=['num_genres'])
+movies = movies.sort_values(by='movieId')
+# Restablecer el índice
+movies = movies.reset_index(drop=True)
+
+# Modificar tabla "movies" sin duplicados
+mod_movies = movies
+mod_movies.to_sql('movies',conn,index=False, if_exists='replace')
+
+#----------------------------------------------------------------------------
+
 ##### CANTIDAD DE CALIFICACIONES POR PELICULA
 ratings.info()
 ratings.head()
@@ -75,12 +96,14 @@ rating_users.describe()
 
 
 
-#### EXCLUIR USUARIOS CON MENOS DE 50 Y MAS DE 450 PELICULAS CALIFICADAS
+#### EXCLUIR USUARIOS CON MAS DE 1080 PELICULAS CALIFICADAS
+#### Considerando que una persona se pueda ver 3 peliculas al dia.
+
 rating_users2=pd.read_sql(''' select "userId",
                          count(*) as cnt_rat
                          from ratings
                          group by "userId"
-                         having cnt_rat >=10 and cnt_rat <=450
+                         having cnt_rat <=1080
                          order by cnt_rat asc
                          ''',conn )
 
@@ -105,12 +128,12 @@ fig.show()
 rating_movies.describe()
 
 
-#### EXCLUIR PELICULAS CON MENOS DE 10 CALIFICACIONES
+#### EXCLUIR PELICULAS CON MENOS DE 3 CALIFICACIONES
 rating_movies2=pd.read_sql(''' select movieId ,
                          count(*) as cnt_rat
                          from ratings
                          group by "movieId"
-                         having cnt_rat>=10
+                         having cnt_rat>=3
                          order by cnt_rat desc
                          ''',conn )
 
@@ -151,22 +174,7 @@ ratings.duplicated().sum() ## al cruzar tablas a veces se duplican registros
 ratings.info()
 ratings.head(10)
 
-
-### Este tratamiento se debe revisar para que tablas se hace el tratamiento
-### ______________________________________________________________________
-
-### tratamiento para separar generos en columnas
-#genres=movies['genres'].str.split('|')
-#te = TransactionEncoder()
-#genres = te.fit_transform(genres)
-#genres = pd.DataFrame(genres, columns = te.columns_)
-
-### unir tablas
-#movies_tratada = pd.concat([movies, genres], axis=1)
-#movies_tratada = movies_tratada.drop('genres', axis=1)
-
-
-
-### para llevar un data frame de pandas a SQL
-#completo = movies_tratada
-#completo.to_sql('movies',conn,index=False, if_exists='replace')
+# ver duplicados por titulo 
+dup_full_ratings = full_ratings[full_ratings.duplicated(subset=['title'], keep=False)]
+dup_full_ratings.sort_values(by='title')
+dup_full_ratings.info()

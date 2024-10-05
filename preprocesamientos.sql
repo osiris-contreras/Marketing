@@ -1,6 +1,6 @@
 ----procesamientos---
 
----crear tabla con usuarios de peliculas que han sido ranquiadas entre 10 y 450
+---crear tabla con usuarios que han calificado un maximo de 3 peliculas al dia.
 
 drop table if exists usuarios_sel;
 
@@ -9,12 +9,12 @@ create table usuarios_sel as
 select "userId" as user_id, count(*) as cnt_rat
 from ratings
 group by "userId"
-having cnt_rat >10 and cnt_rat <= 450
+having cnt_rat <= 1080
 order by cnt_rat desc ;
 
 
 
----crear tabla con peliculas que han sido ranquiadas mayor a 10
+---crear tabla con peliculas que han sido ranquiadas mas de 3 veces
 drop table if exists movies_sel;
 
 
@@ -23,7 +23,7 @@ create table movies_sel as select movieId,
                          count(*) as cnt_rat
                          from ratings
                          group by movieId
-                         having cnt_rat>=10
+                         having cnt_rat>=3
                          order by cnt_rat desc ;
 
 
