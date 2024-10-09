@@ -19,7 +19,7 @@ from sklearn import neighbors ### basado en contenido un solo producto consumido
 from sklearn.neighbors import NearestNeighbors
 from ipywidgets import interact
 
-#pip install dash plotly pandas
+#%pip install dash plotly pandas
 import dash
 from dash import dcc, html
 
@@ -137,16 +137,6 @@ def update_graph(selected_year):
 if __name__ == '__main__':
     app.run_server(debug=True)
 
-#----------------------------------
-
-# Gráfico de barras con las películas mejor calificadas por año
-###fig = px.bar(best_movies_per_year, x='year', y='rating', color='title',
-###             title='Películas Mejor Calificadas por Año de Lanzamiento',
-###             labels={'rating': 'Calificación Promedio', 'year': 'Año de Lanzamiento', 'title': 'Título de la Película'},
-###             hover_data=['title'])
-
-# Mostrar el gráfico
-###fig.show()
 #####################################################
 # Opción 3.  Película mejor calificada por género
 # Crear una lista de géneros
@@ -215,19 +205,9 @@ def update_graph(selected_genre):
 if __name__ == '__main__':
     app.run_server(debug=True)
 
-#----------------------------------
-### Gráfico con las películas más populares por género
-#fig_genre_popularity = px.bar(df2, x='genre', y='rating', color='title',
-#                              title='Película Más Popular por Género',
-#                              labels={'rating': 'Calificación Promedio', 'genre': 'Género', 'title': 'Título de la Película'},
-#                              hover_data=['title'])
-
-# Mostrar el gráfico
-#fig_genre_popularity.show()
 #######################################################################################
 
 # ***** 2. Sistema de recomendación basado en contenido KNN un solo producto visto *****
-# Intento 1
 final2
 
 # Entrenar el modelo KNN con 15 vecinos para asegurarse de encontrar suficientes recomendaciones
@@ -263,57 +243,4 @@ def MovieRecommender(movie_name):
 # Mostrar recomendaciones utilizando un menú interactivo
 interact(MovieRecommender, movie_name=list(movies['title'].value_counts().index));
 
-# En muchos casos no se devuelve una recomendación, se intentó ampliando el número de vecinos
-# y aún así hay muchas películas sin recomendación. Se cambió la metrica con cosine y continúa igual
-
 ################################################################################################
-
-# Intento 2, para solucionar el problema del intento 1, si no se obtiene recomendación, 
-# se seleccionarán 3 películas al azar pertenecientes al mismo género
-
-# Entrenar el modelo KNN con más vecinos para asegurar suficientes recomendaciones
-
-#model = NearestNeighbors(n_neighbors=15, metric='cosine')
-#model.fit(final2)
-
-# Obtener distancias y listas de vecinos
-#dist, idlist = model.kneighbors(final2)
-
-# Modelo de recomendación aplicado a cualquier película
-# def MovieRecommender(movie_name):
-    # Obtener el índice de la película seleccionada
-#    try:
-#        movie_id = movies[movies['title'] == movie_name].index[0]
-#    except IndexError:
-#        return ["Película no encontrada."]
-    
-    # Lista para almacenar las películas recomendadas
-#    list_name = []
-
-    # Obtener las películas más similares, excluyendo la película seleccionada
-#    for newid in idlist[movie_id]:
-#        if movies.loc[newid].title != movie_name:  # Filtrar la película seleccionada
-#            list_name.append(movies.loc[newid].title)
-#        if len(list_name) >= 5:  # Limitar a 5 recomendaciones
-#            break
-
-    # Si no se encontraron suficientes películas, añadir películas del mismo género
-#    if len(list_name) < 5:
-        # Identificar los géneros de la película seleccionada
-#        movie_genres = movies.loc[movie_id, movies.columns[3:]].astype(bool)
-#        genre_columns = movie_genres.index[movie_genres].tolist()
-        
-        # Filtrar las películas que pertenecen al mismo género
-#        same_genre_movies = movies.copy()
-#        same_genre_movies = same_genre_movies[same_genre_movies[genre_columns].any(axis=1)]
-#        same_genre_movies = same_genre_movies[~same_genre_movies['title'].isin(list_name + [movie_name])]
-        
-        # Seleccionar películas aleatorias del mismo género
-#        additional_recommendations = same_genre_movies['title'].sample(n=min(5-len(list_name), len(same_genre_movies))).tolist()
-#        list_name.extend(additional_recommendations)
-
-    # Devolver las películas recomendadas
-#    return list_name
-
-# Mostrar recomendaciones utilizando un menú interactivo
-#interact(MovieRecommender, movie_name=list(movies['title'].value_counts().index));
