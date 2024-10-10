@@ -19,7 +19,7 @@ from surprise import Reader, Dataset
 from surprise.model_selection import cross_validate, GridSearchCV
 from surprise import KNNBasic, KNNWithMeans, KNNWithZScore, KNNBaseline
 from surprise.model_selection import train_test_split
-
+from surprise import SVD, SVDpp, NMF, CoClustering
 
 #############################################################
 ####                Conectar base de Datos               ####
@@ -92,6 +92,10 @@ print(interact(recomendar))
 ##### 4.Sistema de recomendación filtro colaborativo   #####
 ############################################################
 
+############################################################
+##### 4.Sistema de recomendación filtro colaborativo   #####
+############################################################
+
 ### datos originales en pandas
 ## knn solo sirve para calificaciones explicitas
 ratings = pd.read_sql('select * from ratings_final where rating>0', conn)
@@ -129,32 +133,42 @@ performance_df = pd.DataFrame.from_dict(results).T
 performance_df.sort_values(by='RMSE')
 
 ###################se escoge el mejor knn withmeans#########################
-param_grid = { 'sim_options' : {'name': ['msd','cosine'], \
-                                'min_support': [5,2], \
-                                'user_based': [False, True]}
-             }
 
 ## min support es la cantidad de items o usuarios que necesita para calcular recomendación
 ## name medidas de distancia
 
 ### se afina si es basado en usuario o basado en ítem
 
-gridsearchKNNWithMeans = GridSearchCV(KNNWithMeans, param_grid, measures=['rmse'], \
-                                      cv=2, n_jobs=-1)
-                                    
+###################
+################### Ampliando los hiperparámetros del modelo KNNWithMeans #########################
+
+param_grid = { 
+    'sim_options' : {
+        'name': ['msd', 'cosine', 'pearson'],  # Agregamos 'pearson' como otra opción
+        'min_support': [1, 2, 5, 10],  # Exploramos un rango más amplio de min_support
+        'user_based': [False, True]  # Continuamos explorando basado en usuarios o ítems
+    },
+    'k': [10, 20, 40]  # Agregamos el parámetro 'k' para cambiar la cantidad de vecinos
+}
+
+## Ejecutamos GridSearchCV para buscar los mejores parámetros
+gridsearchKNNWithMeans = GridSearchCV(KNNWithMeans, param_grid, measures=['rmse'], cv=3, n_jobs=-1)
+
+# Entrenamos el GridSearch
 gridsearchKNNWithMeans.fit(data)
 
+# Mostramos los mejores parámetros encontrados y el mejor score de RMSE
+print("Mejores parámetros:", gridsearchKNNWithMeans.best_params["rmse"])
+print("Mejor score de RMSE:", gridsearchKNNWithMeans.best_score["rmse"])
 
-gridsearchKNNWithMeans.best_params["rmse"]
-gridsearchKNNWithMeans.best_score["rmse"]
-gs_model=gridsearchKNNWithMeans.best_estimator['rmse'] ### mejor estimador de gridsearch
+# Guardamos el mejor modelo encontrado
+gs_model = gridsearchKNNWithMeans.best_estimator['rmse']  # Mejor estimador de GridSearch
 
 
 ################# Entrenar con todos los datos y Realizar predicciones con el modelo afinado
-
+###################
 trainset = data.build_full_trainset() ### esta función convierte todos los datos en entrnamiento, las funciones anteriores dividen  en entrenamiento y evaluación
 model=gs_model.fit(trainset) ## se reentrena sobre todos los datos posibles (sin dividir)
-
 
 
 predset = trainset.build_anti_testset() ### crea una tabla con todos los usuarios y los libros que no han leido
