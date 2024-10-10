@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import sqlite3 as sql
 import a_funciones as fn ## para procesamiento
+from mlxtend.preprocessing import TransactionEncoder
 import openpyxl
 import sys
 import os
